@@ -9,25 +9,24 @@ This project is a Java-based **GUI Personal Budget Tracker** that helps users ma
 
 | Member       | Roll No        | Module Implemented                |
 |--------------|----------------|-----------------------------------|
-| Farhan       | L1F22BSSE0233  | Income & Expense Panel            |
-| Anees        | L1F22BSSE0217  | Balance Panel + Session Summary   |
-| Taimoor      | L1F22BSSE0234  | Limit Checker + Reset Logic       |
+| Farhan       | L1F22BSSE0233  | Income & Expense Panel, Session Summary, Exit            |
+| Anees        | L1F22BSSE0217  | Balance Panel + Expense Reports, Manage Records(Edit/Delete)|
+| Taimoor      | L1F22BSSE0234  | Limit Checker + Reset Logic, Sort Expense by Date/Amount       |
 
 > 🔄 Developed collaboratively using GitHub feature branches.
 
 ---
 
-## 📌 Features
+🔧 Features Overview
 
-- ✅ Add **Income** with source (Salary, Freelance, etc.)
-- ✅ Add **Expense** with category and date
-- ✅ View **Total Balance** (Income - Expenses)
-- ✅ Generate **Category-wise Report**
-- ✅ Set and check **Expense Limits** by category
-- ✅ Get **Warnings** when nearing/exceeding limit
-- ✅ View **Session Summary** (Total I/E + Top Spending Category)
-- ✅ Reset all data anytime
-
----
-
+### ✔️ Core Functionalities:
+- **➕ Add Income:** Input income amount and select source (Salary, Freelance, Other)
+- **➖ Add Expense:** Input expense amount, category (Food, Travel, Utilities), and date
+- **📊 View Balance:** Shows total income, total expenses, and net balance
+- **📋 View Reports:** Category-wise expense report
+- **⚠️ Expense Limit Checker:** Set limits per category and check if limit is exceeded or near
+- **🔁 Sort Expenses:** Sort by **Amount** or **Date**
+- **🗑️ Manage Records:** View and delete specific income/expense entries
+- **🧹 Reset Data:** Clears all income and expense records
+- **📌 Session Summary:** Total income, expense, balance, and top spending category
 

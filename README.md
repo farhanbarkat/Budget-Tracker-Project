@@ -29,4 +29,30 @@ This project is a Java-based **GUI Personal Budget Tracker** that helps users ma
 - **🗑️ Manage Records:** View and delete specific income/expense entries
 - **🧹 Reset Data:** Clears all income and expense records
 - **📌 Session Summary:** Total income, expense, balance, and top spending category
+## ✅ Completed All Project Tasks?
 
+- [x] Add Income & Expense ✅  
+- [x] Balance Calculation ✅  
+- [x] Category Report ✅  
+- [x] Limit Checker ✅  
+- [x] Sort by Amount / Date ✅  
+- [x] Record Delete / Manage ✅  
+- [x] Session Summary ✅  
+- [x] Reset Feature ✅  
+- [x] Input Validation ✅  
+
+---
+
+## 🔄 Git Collaboration (Group Work)
+
+Each member was responsible for different panels and pushed code via:
+- GitHub Repositories (Individual or Shared)
+- Git Branching for separate features
+- README files for their parts
+
+---
+
+## 🏁 Final Notes
+
+- This project is ideal for students learning **Java GUI, OOP, and Team Collaboration**.
+- The structure is modular, allowing more features (like charts, data export) to be added later.

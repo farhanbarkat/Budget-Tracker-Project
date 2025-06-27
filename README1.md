@@ -1,7 +1,4 @@
- Member 1 (Farhan) - Income & Expense GUI
+ Member 1 (Farhan) 
+ (Income + Expense + Summary + Exit)
 
-- Developed `getIncomePanel()` and `getExpensePanel()` methods.
-- Handled user inputs for income and expense.
-- Used JComboBox for source/category selection.
-- Implemented `Save` button with input validation.
-- Layout: GridLayout with form-based panel design.
+ 

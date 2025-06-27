@@ -1,10 +1,9 @@
- Member 1 Farhan: Add Income & Expense Panels only
-
 package xyz;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.swing.*;
 
 class Income {
@@ -53,13 +52,15 @@ public class GUIAppMember1 {
     }
 
     private void initialize() {
-        frame = new JFrame("Member 1 - Income & Expense Panel");
-        frame.setBounds(100, 100, 500, 400);
+        frame = new JFrame("Member 1 - Income, Expense, Summary, Exit");
+        frame.setBounds(100, 100, 600, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setLayout(new GridLayout(2, 1));
+        frame.setLayout(new GridLayout(4, 1, 10, 10));
 
-        frame.getContentPane().add(getIncomePanel());
-        frame.getContentPane().add(getExpensePanel());
+        frame.add(getIncomePanel());
+        frame.add(getExpensePanel());
+        frame.add(getSummaryPanel());
+        frame.add(getExitPanel());
     }
 
     private JPanel getIncomePanel() {
@@ -73,22 +74,18 @@ public class GUIAppMember1 {
         saveBtn.addActionListener(e -> {
             try {
                 int amt = Integer.parseInt(amountField.getText());
-                String src = (String) sourceBox.getSelectedItem();
-                incomeList.add(new Income(amt, src));
+                String source = (String) sourceBox.getSelectedItem();
+                incomeList.add(new Income(amt, source));
                 JOptionPane.showMessageDialog(frame, "Income saved!");
                 amountField.setText("");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Invalid amount");
+                JOptionPane.showMessageDialog(frame, "Invalid input");
             }
         });
 
-        panel.add(new JLabel("Amount:"));
-        panel.add(amountField);
-        panel.add(new JLabel("Source:"));
-        panel.add(sourceBox);
-        panel.add(new JLabel(""));
-        panel.add(saveBtn);
-
+        panel.add(new JLabel("Amount:")); panel.add(amountField);
+        panel.add(new JLabel("Source:")); panel.add(sourceBox);
+        panel.add(new JLabel("")); panel.add(saveBtn);
         return panel;
     }
 
@@ -98,13 +95,13 @@ public class GUIAppMember1 {
 
         JTextField amountField = new JTextField();
         JTextField dateField = new JTextField();
-        JComboBox<String> categoryBox = new JComboBox<>(new String[]{"Food", "Travel", "Utilities"});
+        JComboBox<String> catBox = new JComboBox<>(new String[]{"Food", "Travel", "Utilities"});
         JButton saveBtn = new JButton("Save Expense");
 
         saveBtn.addActionListener(e -> {
             try {
                 int amt = Integer.parseInt(amountField.getText());
-                String cat = (String) categoryBox.getSelectedItem();
+                String cat = (String) catBox.getSelectedItem();
                 String date = dateField.getText();
                 expenseList.add(new Expense(amt, cat, date));
                 JOptionPane.showMessageDialog(frame, "Expense saved!");
@@ -115,15 +112,46 @@ public class GUIAppMember1 {
             }
         });
 
-        panel.add(new JLabel("Amount:"));
-        panel.add(amountField);
-        panel.add(new JLabel("Date (dd/mm/yyyy):"));
-        panel.add(dateField);
-        panel.add(new JLabel("Category:"));
-        panel.add(categoryBox);
-        panel.add(new JLabel(""));
-        panel.add(saveBtn);
+        panel.add(new JLabel("Amount:")); panel.add(amountField);
+        panel.add(new JLabel("Date (dd/mm/yyyy):")); panel.add(dateField);
+        panel.add(new JLabel("Category:")); panel.add(catBox);
+        panel.add(new JLabel("")); panel.add(saveBtn);
+        return panel;
+    }
 
+    private JPanel getSummaryPanel() {
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createTitledBorder("Session Summary"));
+
+        JButton summaryBtn = new JButton("Show Summary");
+        summaryBtn.addActionListener(e -> {
+            int totalIncome = incomeList.stream().mapToInt(Income::getAmount).sum();
+            int totalExpense = expenseList.stream().mapToInt(Expense::getAmount).sum();
+            String topCategory = expenseList.stream()
+                    .collect(Collectors.groupingBy(Expense::getCategory, Collectors.summingInt(Expense::getAmount)))
+                    .entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey).orElse("None");
+
+            JOptionPane.showMessageDialog(frame,
+                    "Session Summary:\nIncome: Rs. " + totalIncome +
+                            "\nExpense: Rs. " + totalExpense +
+                            "\nBalance: Rs. " + (totalIncome - totalExpense) +
+                            "\nTop Category: " + topCategory);
+        });
+
+        panel.add(summaryBtn);
+        return panel;
+    }
+
+    private JPanel getExitPanel() {
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createTitledBorder("Exit Application"));
+
+        JButton exitBtn = new JButton("Exit");
+        exitBtn.addActionListener(e -> System.exit(0));
+
+        panel.add(exitBtn);
         return panel;
     }
 }

@@ -3,8 +3,10 @@ package xyz;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 class Income {
     private int amount;
@@ -15,6 +17,8 @@ class Income {
     }
     public int getAmount() { return amount; }
     public String getSource() { return source; }
+    public void setAmount(int amount) { this.amount = amount; }
+    public void setSource(String source) { this.source = source; }
 }
 
 class Expense {
@@ -29,6 +33,9 @@ class Expense {
     public int getAmount() { return amount; }
     public String getCategory() { return category; }
     public String getDate() { return date; }
+    public void setAmount(int amount) { this.amount = amount; }
+    public void setCategory(String category) { this.category = category; }
+    public void setDate(String date) { this.date = date; }
 }
 
 class LimitChecker {
@@ -49,6 +56,7 @@ public class GUIApp {
     private ArrayList<Income> incomeList = new ArrayList<>();
     private ArrayList<Expense> expenseList = new ArrayList<>();
     private LimitChecker limitChecker = new LimitChecker();
+    private DefaultTableModel tableModel = new DefaultTableModel(new String[]{"Type", "Amount", "Category/Source", "Date"}, 0);
 
     public static void main(String[] args) {
         try {
@@ -72,13 +80,13 @@ public class GUIApp {
 
     private void initialize() {
         frame = new JFrame("Personal Budget Tracker");
-        frame.setBounds(100, 100, 750, 500);
+        frame.setBounds(100, 100, 850, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BorderLayout());
 
-        JPanel navPanel = new JPanel(new GridLayout(2, 4, 10, 10));
+        JPanel navPanel = new JPanel(new GridLayout(2, 5, 10, 10));
         navPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        String[] btnLabels = {"Add Income", "Add Expense", "Balance", "Report", "Limit", "Reset", "Summary", "Exit"};
+        String[] btnLabels = {"Add Income", "Add Expense", "Balance", "Report", "Limit", "Manage Records", "Sort", "Reset", "Summary", "Exit"};
         JButton[] buttons = new JButton[btnLabels.length];
 
         for (int i = 0; i < btnLabels.length; i++) {
@@ -93,18 +101,23 @@ public class GUIApp {
         cardPanel.add(getBalancePanel(), "balance");
         cardPanel.add(getReportPanel(), "report");
         cardPanel.add(getLimitPanel(), "limit");
+        cardPanel.add(getManagePanel(), "manage");
+        cardPanel.add(getSortPanel(), "sort");
 
         buttons[0].addActionListener(e -> cardLayout.show(cardPanel, "income"));
         buttons[1].addActionListener(e -> cardLayout.show(cardPanel, "expense"));
         buttons[2].addActionListener(e -> cardLayout.show(cardPanel, "balance"));
         buttons[3].addActionListener(e -> cardLayout.show(cardPanel, "report"));
         buttons[4].addActionListener(e -> cardLayout.show(cardPanel, "limit"));
-        buttons[5].addActionListener(e -> {
+        buttons[5].addActionListener(e -> cardLayout.show(cardPanel, "manage"));
+        buttons[6].addActionListener(e -> cardLayout.show(cardPanel, "sort"));
+        buttons[7].addActionListener(e -> {
             incomeList.clear();
             expenseList.clear();
+            tableModel.setRowCount(0);
             JOptionPane.showMessageDialog(frame, "All data has been reset!");
         });
-        buttons[6].addActionListener(e -> {
+        buttons[8].addActionListener(e -> {
             int totalIncome = incomeList.stream().mapToInt(Income::getAmount).sum();
             int totalExpense = expenseList.stream().mapToInt(Expense::getAmount).sum();
             String topCategory = expenseList.stream()
@@ -117,7 +130,7 @@ public class GUIApp {
                 "\nBalance: Rs. " + (totalIncome - totalExpense) +
                 "\nTop Category: " + topCategory);
         });
-        buttons[7].addActionListener(e -> System.exit(0));
+        buttons[9].addActionListener(e -> System.exit(0));
 
         frame.getContentPane().add(navPanel, BorderLayout.NORTH);
         frame.getContentPane().add(cardPanel, BorderLayout.CENTER);
@@ -125,27 +138,16 @@ public class GUIApp {
 
     private JPanel getIncomePanel() {
         JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
-        panel.setBackground(new Color(240, 248, 255));
-
-        JLabel lblAmt = new JLabel("Amount:");
-        lblAmt.setFont(new Font("Segoe UI", Font.BOLD, 14));
         JTextField amountField = new JTextField();
-
-        JLabel lblSrc = new JLabel("Source:");
-        lblSrc.setFont(new Font("Segoe UI", Font.BOLD, 14));
         JComboBox<String> sourceBox = new JComboBox<>(new String[]{"Salary", "Freelance", "Other"});
-
         JButton saveBtn = new JButton("Save Income");
-        saveBtn.setBackground(new Color(60, 179, 113));
-        saveBtn.setForeground(new Color(0,0,0));
-        saveBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         saveBtn.addActionListener(e -> {
             try {
                 int amt = Integer.parseInt(amountField.getText());
                 String source = (String) sourceBox.getSelectedItem();
                 incomeList.add(new Income(amt, source));
+                tableModel.addRow(new Object[]{"Income", amt, source, "-"});
                 JOptionPane.showMessageDialog(frame, "Income saved!");
                 amountField.setText("");
             } catch (Exception ex) {
@@ -153,30 +155,18 @@ public class GUIApp {
             }
         });
 
-        panel.add(lblAmt); panel.add(amountField);
-        panel.add(lblSrc); panel.add(sourceBox);
+        panel.add(new JLabel("Amount:")); panel.add(amountField);
+        panel.add(new JLabel("Source:")); panel.add(sourceBox);
         panel.add(new JLabel("")); panel.add(saveBtn);
         return panel;
     }
 
     private JPanel getExpensePanel() {
         JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
-        panel.setBackground(new Color(255, 250, 240));
-
         JTextField amountField = new JTextField();
         JTextField dateField = new JTextField();
         JComboBox<String> catBox = new JComboBox<>(new String[]{"Food", "Travel", "Utilities"});
         JButton saveBtn = new JButton("Save Expense");
-
-        saveBtn.setBackground(new Color(255, 99, 71));
-        saveBtn.setForeground(Color.BLACK);
-        saveBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        panel.add(new JLabel("Amount:")); panel.add(amountField);
-        panel.add(new JLabel("Date (dd/mm/yyyy):")); panel.add(dateField);
-        panel.add(new JLabel("Category:")); panel.add(catBox);
-        panel.add(new JLabel("")); panel.add(saveBtn);
 
         saveBtn.addActionListener(e -> {
             try {
@@ -184,6 +174,7 @@ public class GUIApp {
                 String cat = (String) catBox.getSelectedItem();
                 String date = dateField.getText();
                 expenseList.add(new Expense(amt, cat, date));
+                tableModel.addRow(new Object[]{"Expense", amt, cat, date});
                 JOptionPane.showMessageDialog(frame, "Expense saved!");
                 amountField.setText("");
                 dateField.setText("");
@@ -191,27 +182,20 @@ public class GUIApp {
                 JOptionPane.showMessageDialog(frame, "Invalid input");
             }
         });
+
+        panel.add(new JLabel("Amount:")); panel.add(amountField);
+        panel.add(new JLabel("Date (dd/mm/yyyy):")); panel.add(dateField);
+        panel.add(new JLabel("Category:")); panel.add(catBox);
+        panel.add(new JLabel("")); panel.add(saveBtn);
         return panel;
     }
 
     private JPanel getBalancePanel() {
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
-        panel.setBackground(new Color(240, 255, 240));
-
         JLabel incomeLbl = new JLabel("Total Income: ");
         JLabel expenseLbl = new JLabel("Total Expense: ");
         JLabel balanceLbl = new JLabel("Balance: ");
         JButton calcBtn = new JButton("Calculate");
-
-        calcBtn.setBackground(new Color(70, 130, 180));
-        calcBtn.setForeground(Color.BLACK);
-        calcBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        panel.add(incomeLbl);
-        panel.add(expenseLbl);
-        panel.add(balanceLbl);
-        panel.add(calcBtn);
 
         calcBtn.addActionListener(e -> {
             int income = incomeList.stream().mapToInt(Income::getAmount).sum();
@@ -220,19 +204,18 @@ public class GUIApp {
             expenseLbl.setText("Total Expense: Rs. " + expense);
             balanceLbl.setText("Balance: Rs. " + (income - expense));
         });
+
+        panel.add(incomeLbl);
+        panel.add(expenseLbl);
+        panel.add(balanceLbl);
+        panel.add(calcBtn);
         return panel;
     }
 
     private JPanel getReportPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setBackground(new Color(255, 255, 255));
-
         JTextArea area = new JTextArea();
-        area.setFont(new Font("Segoe UI", Font.BOLD, 20));
         JButton generate = new JButton("Generate Report");
-        generate.setBackground(new Color(128, 0, 128));
-        generate.setForeground(Color.BLACK);
 
         generate.addActionListener(e -> {
             Map<String, Integer> report = new HashMap<>();
@@ -251,24 +234,10 @@ public class GUIApp {
 
     private JPanel getLimitPanel() {
         JPanel panel = new JPanel(new GridLayout(6, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
-        panel.setBackground(new Color(255, 248, 220));
-
         JComboBox<String> catBox = new JComboBox<>(new String[]{"Food", "Travel", "Utilities"});
         JTextField limitField = new JTextField();
         JLabel status = new JLabel("Status:");
         JButton check = new JButton("Check Limit");
-
-        check.setBackground(new Color(255, 140, 0));
-        check.setForeground(Color.BLACK);
-        check.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        panel.add(new JLabel("Select Category:"));
-        panel.add(catBox);
-        panel.add(new JLabel("Set Limit:"));
-        panel.add(limitField);
-        panel.add(check);
-        panel.add(status);
 
         check.addActionListener(e -> {
             try {
@@ -281,6 +250,72 @@ public class GUIApp {
                 JOptionPane.showMessageDialog(frame, "Invalid input");
             }
         });
+
+        panel.add(new JLabel("Select Category:"));
+        panel.add(catBox);
+        panel.add(new JLabel("Set Limit:"));
+        panel.add(limitField);
+        panel.add(check);
+        panel.add(status);
+        return panel;
+    }
+
+    private JPanel getManagePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JTable table = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        JButton deleteBtn = new JButton("Delete Selected");
+
+        deleteBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row != -1) {
+                String type = (String) tableModel.getValueAt(row, 0);
+                int amount = (int) tableModel.getValueAt(row, 1);
+                String label = (String) tableModel.getValueAt(row, 2);
+                tableModel.removeRow(row);
+                if (type.equals("Income")) {
+                    incomeList.removeIf(i -> i.getAmount() == amount && i.getSource().equals(label));
+                } else {
+                    expenseList.removeIf(i -> i.getAmount() == amount && i.getCategory().equals(label));
+                }
+            }
+        });
+
+        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(deleteBtn, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    private JPanel getSortPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JTextArea area = new JTextArea();
+        JButton sortAmountBtn = new JButton("Sort by Amount");
+        JButton sortDateBtn = new JButton("Sort by Date");
+
+        sortAmountBtn.addActionListener(ev -> {
+            List<Expense> sorted = new ArrayList<>(expenseList);
+            sorted.sort(Comparator.comparingInt(Expense::getAmount));
+            area.setText("--- Expenses Sorted by Amount ---\n");
+            for (Expense ex : sorted) {
+                area.append(ex.getCategory() + " - Rs." + ex.getAmount() + " - " + ex.getDate() + "\n");
+            }
+        });
+
+        sortDateBtn.addActionListener(ev -> {
+            List<Expense> sorted = new ArrayList<>(expenseList);
+            sorted.sort(Comparator.comparing(Expense::getDate));
+            area.setText("--- Expenses Sorted by Date ---\n");
+            for (Expense ex : sorted) {
+                area.append(ex.getCategory() + " - Rs." + ex.getAmount() + " - " + ex.getDate() + "\n");
+            }
+        });
+
+        JPanel btnPanel = new JPanel(new GridLayout(1, 2));
+        btnPanel.add(sortAmountBtn);
+        btnPanel.add(sortDateBtn);
+
+        panel.add(btnPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(area), BorderLayout.CENTER);
         return panel;
     }
 }

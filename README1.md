@@ -1,2 +1,1 @@
- Member 1(Farhan)  Feature
-Added Income & Expense panel.
+ Member 1(Farhan) code (Income + Expense + Summary + Exit).
